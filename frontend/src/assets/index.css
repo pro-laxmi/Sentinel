@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0f1115; /* A deep, devops-style dark mode background */
+  color: #ffffff;
+}

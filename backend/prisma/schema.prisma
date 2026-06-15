@@ -1,0 +1,278 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------- ENUMS ----------------
+
+enum Role {
+  ADMIN
+  DEVELOPER
+  VIEWER
+}
+
+enum LogLevel {
+  INFO
+  WARNING
+  ERROR
+  FATAL
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum Status {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+  CLOSED
+}
+
+enum DeploymentStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  ROLLED_BACK
+}
+
+enum Environment {
+  DEVELOPMENT
+  STAGING
+  PRODUCTION
+}
+
+enum HealthStatus {
+  HEALTHY
+  DOWN
+}
+
+enum EventType {
+  INCIDENT_CREATED
+  SEVERITY_CHANGED
+  STATUS_CHANGED
+  PARTICIPANT_ADDED
+  PARTICIPANT_REMOVED
+  ASSIGNED
+  COMMENT_ADDED
+  DEPLOYMENT_LINKED
+  INCIDENT_RESOLVED
+  INCIDENT_REOPENED
+}
+
+enum ParticipantRole {
+  OWNER
+  ASSIGNEE
+  PARTICIPANT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TeamRole {
+  OWNER
+  MEMBER
+}
+
+// ---------------- MODELS ----------------
+
+model User {
+  id                   String                 @id @default(uuid())
+  username             String                 @unique
+  email                String                 @unique
+  password             String
+  bio                  String?
+  role                 Role                   @default(DEVELOPER)
+  
+  // Relations
+  commits              Commit[]
+  incidentMessages     IncidentMessage[]
+  incidentEvents       IncidentEvent[]
+  incidentParticipants IncidentParticipant[]
+  tasks                Task[]
+  teamMembers          TeamMember[]
+}
+
+model Team {
+  id                   String                 @id @default(uuid())
+  name                 String                 @unique
+  description          String?
+  createdAt            DateTime               @default(now())
+  
+  // Relations
+  members              TeamMember[]
+  incidents            Incident[]             // Incidents owned by this team
+  participants         IncidentParticipant[]  // Tracks which team a user represented
+}
+
+model TeamMember {
+  id                   String                 @id @default(uuid())
+  memberId             String
+  teamId               String
+  role                 TeamRole               @default(MEMBER)
+  
+  // Relations
+  user                 User                   @relation(fields: [memberId], references: [id])
+  team                 Team                   @relation(fields: [teamId], references: [id])
+}
+
+model Log {
+  id                   String                 @id @default(uuid())
+  serviceId            String
+  level                LogLevel
+  message              String
+  timestamp            DateTime               @default(now())
+  
+  // Relations
+  alerts               Alert[]
+}
+
+model Alert {
+  id                   String                 @id @default(uuid())
+  logId                String
+  title                String
+  severity             Severity
+  status               Status                 @default(OPEN)
+  createdAt            DateTime               @default(now())
+  resolvedAt           DateTime?
+  
+  // Relations
+  log                  Log                    @relation(fields: [logId], references: [id])
+  incidents            Incident[]
+}
+
+model Incident {
+  id                   String                 @id @default(uuid())
+  alertId              String?                // Optional: Manual incidents might not have alerts
+  teamId               String?                // Optional: For "on-the-fly" incidents
+  title                String
+  severity             Severity
+  status               Status                 @default(OPEN)
+  createdAt            DateTime               @default(now())
+  resolvedAt           DateTime?
+  slaTarget            DateTime?
+  slaBreached          Boolean                @default(false)
+  aiSummary            String?
+  aiRootCause          String?
+  
+  // Relations
+  alert                Alert?                 @relation(fields: [alertId], references: [id])
+  team                 Team?                  @relation(fields: [teamId], references: [id])
+  messages             IncidentMessage[]
+  events               IncidentEvent[]
+  participants         IncidentParticipant[]
+  tasks                Task[]
+}
+
+model Service {
+  id                   String                 @id @default(uuid())
+  title                String
+  url                  String                 @unique
+  
+  // Relations
+  healthChecks         HealthCheck[]
+}
+
+model HealthCheck {
+  id                   String                 @id @default(uuid())
+  serviceId            String
+  status               HealthStatus
+  responseTimeMs       Int
+  createdAt            DateTime               @default(now())
+  
+  // Relations
+  service              Service                @relation(fields: [serviceId], references: [id])
+}
+
+model Commit {
+  id                   String                 @id @default(uuid())
+  repoId               String
+  commitsha            String                 @unique
+  message              String
+  createdAt            DateTime               @default(now())
+  createdBy            String
+  
+  // Relations
+  user                 User                   @relation(fields: [createdBy], references: [id])
+  deployments          Deployment[]
+}
+
+model Deployment {
+  id                   String                 @id @default(uuid())
+  commitId             String
+  status               DeploymentStatus
+  environment          Environment
+  message              String?
+  createdAt            DateTime               @default(now())
+  
+  // Relations
+  commit               Commit                 @relation(fields: [commitId], references: [id])
+}
+
+model IncidentParticipant {
+  id                   String                 @id @default(uuid())
+  incidentId           String
+  userId               String
+  teamAssignedId       String?                // Optional: They might join independently
+  role                 ParticipantRole
+  joinedAt             DateTime               @default(now())
+  
+  // Relations
+  incident             Incident               @relation(fields: [incidentId], references: [id])
+  user                 User                   @relation(fields: [userId], references: [id])
+  team                 Team?                  @relation(fields: [teamAssignedId], references: [id])
+}
+
+model IncidentMessage {
+  id                   String                 @id @default(uuid())
+  incidentId           String
+  userId               String
+  message              String
+  createdAt            DateTime               @default(now())
+  
+  // Relations
+  incident             Incident               @relation(fields: [incidentId], references: [id])
+  user                 User                   @relation(fields: [userId], references: [id])
+}
+
+model IncidentEvent {
+  id                   String                 @id @default(uuid())
+  incidentId           String
+  eventType            EventType
+  actorId              String
+  oldValue             String?
+  newValue             String?
+  createdAt            DateTime               @default(now())
+  
+  // Relations
+  incident             Incident               @relation(fields: [incidentId], references: [id])
+  actor                User                   @relation(fields: [actorId], references: [id])
+}
+
+model Task {
+  id                   String                 @id @default(uuid())
+  incidentId           String
+  assigneeId           String?
+  title                String
+  description          String?
+  status               TaskStatus             @default(TODO)
+  createdAt            DateTime               @default(now())
+  
+  // Relations
+  incident             Incident               @relation(fields: [incidentId], references: [id])
+  assignee             User?                  @relation(fields: [assigneeId], references: [id])
+}
