@@ -1,4 +1,3 @@
-// backend/middleware/authMiddleware.js
 import jwt from 'jsonwebtoken';
 
 export const verifyClearance = (req, res, next) => {
@@ -25,3 +24,12 @@ export const verifyClearance = (req, res, next) => {
   }
 };
 
+export const checkRole = (requiredRole) => {
+  return (req, res, next) => {
+    // Ensure that the operator's role matches the required role
+    if (req.operator.role !== requiredRole) {
+      return res.status(403).json({ error: 'Access Denied: Insufficient clearance.' });
+    }
+    next();
+  };
+};

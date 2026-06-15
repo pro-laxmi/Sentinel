@@ -65,7 +65,7 @@ export const loginUser = async (req, res) => {
 
     // Generate the JWT token containing user profile and role details
     const token = jwt.sign(
-      { id: user.id, username: user.username, role: user.role },
+      { id: user.id, username: user.username, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: '24h' } // Token expires in 1 day
     );
@@ -81,10 +81,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// 3. LOGOUT ROUTE
-// Note: With stateless JWTs, "logout" is technically done on the frontend 
-// by destroying the token from local storage or cookies. However, exposing a explicit
-// endpoint confirms intention and lets you handle cookie clearing if you choose that path later.
 export const logoutUser = (req, res) => {
   res.status(200).json({ 
     success: true, 

@@ -39,6 +39,15 @@ enum Status {
   CLOSED
 }
 
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  CREATE_SERVICE
+  UPDATE_SERVICE
+  DELETE_SERVICE
+  UPDATE_CLEARANCE
+}
+
 enum DeploymentStatus {
   PENDING
   RUNNING
@@ -105,6 +114,7 @@ model User {
   incidentParticipants IncidentParticipant[]
   tasks                Task[]
   teamMembers          TeamMember[]
+  auditEvents          AuditEvent[]
 }
 
 model Team {
@@ -135,10 +145,21 @@ model Log {
   serviceId            String
   level                LogLevel
   message              String
-  timestamp            DateTime               @default(now())
+  createdAt            DateTime               @default(now())
   
   // Relations
   alerts               Alert[]
+  service              Service                @relation(fields: [serviceId], references: [id])
+}
+
+model AuditEvent {
+  id         String      @id @default(uuid())
+  operatorId String
+  action     AuditAction
+  createdAt  DateTime    @default(now())
+
+  // The relation: Links this event to a specific operator
+  operator   User        @relation(fields: [operatorId], references: [id])
 }
 
 model Alert {
@@ -182,9 +203,11 @@ model Service {
   id                   String                 @id @default(uuid())
   title                String
   url                  String                 @unique
+  isActive             Boolean                @default(true)
   
   // Relations
   healthChecks         HealthCheck[]
+  logs                 Log[]
 }
 
 model HealthCheck {

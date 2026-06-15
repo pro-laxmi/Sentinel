@@ -1,23 +1,33 @@
-import { AuthProvider } from './context/authContext';
-import { useAuth } from './features/auth/hooks/useAuth';
-import Auth from './features/auth/auth';
-import Dashboard from './features/dashboard/dashboard';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth'; // Import the hook
+import Layout from './components/Layout';
+import DashboardPage from './pages/DashboardPage';
+import ServicesPage from './pages/ServicesPage';
+import LogsPage from './pages/LogsPage';
+import LoginPage from './pages/LoginPage';
 
-const AppContent = () => {
-  const { isAuthenticated, loading } = useAuth();
+function App() {
+  const { isAuthenticated, loading } = useAuth(); // Get state directly from Context
 
   if (loading) {
-    return <div className="min-h-screen bg-[#0a0c10] text-slate-500 flex items-center justify-center font-mono">LOADING_SYSTEMS...</div>;
+    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-emerald-500 font-mono animate-pulse">VERIFYING CLEARANCE...</div>;
   }
 
-  // Traffic Control: If not logged in, show Auth. Otherwise, show Dashboard.
-  return isAuthenticated ? <Dashboard /> : <Auth />;
-};
-
-export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <Router>
+      <Routes>
+        <Route path="/login" element={
+          isAuthenticated ? <Navigate to="/" /> : <LoginPage />
+        } />
+        
+        <Route path="/" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
+          <Route index element={<DashboardPage />} />
+          <Route path="services" element={<ServicesPage />} />
+          <Route path="logs" element={<LogsPage />} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
+
+export default App;
