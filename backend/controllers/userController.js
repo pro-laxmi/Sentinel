@@ -76,3 +76,21 @@ export const updateUserProfile = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Get all users for assignment
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true
+      }
+    });
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

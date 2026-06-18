@@ -7,6 +7,7 @@ import serviceRoutes from './routes/serviceRoutes.js';
 import logRoutes from './routes/logRoutes.js';
 import alertRoutes from './routes/alertRoutes.js';
 import startHealthCheckWorker from './jobs/healthChecker.js';
+import teamRoutes from './routes/teamRoutes.js';
 import githubRoutes from './routes/githubRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 
@@ -27,6 +28,7 @@ app.use('/api/logs', logRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/github', githubRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/teams', teamRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'Sentinel Backend is alive.' });
@@ -35,5 +37,5 @@ app.get('/api/health', (req, res) => {
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`[SENTINEL CORE] Server running on http://localhost:${PORT}`);
-  startHealthCheckWorker();
+  // startHealthCheckWorker();
 });

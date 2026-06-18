@@ -36,6 +36,30 @@ export const getOpenAlerts = async(req, res) => {
     }
 };
 
+export const getOnlyOpenAlerts = async(req, res) => {
+    try {
+        const openAlerts = await prisma.alert.findMany({
+            where: {
+                status: 'OPEN'
+            },
+            include: {
+                log: {
+                    include: {
+                        service: true
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+        res.status(200).json({ success: true, data: openAlerts });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch only open alerts.' });
+    }
+};
+
 export const getAlertsById = async (req, res) => {
     try {
         const { Id } = req.params;

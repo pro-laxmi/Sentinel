@@ -16,11 +16,12 @@ export const AuthProvider = ({ children }) => {
       
       setUser({
         username: payload.username || 'Operator', // Fallback if missing
-        email: payload.email || 'admin@sentinel.core'
+        email: payload.email || 'admin@sentinel.core',
+        role: payload.role || 'VIEWER' // Add role
       });
     } catch (error) {
       console.error("Failed to decode token", error);
-      setUser({ username: 'Operator', email: 'admin@sentinel.core' });
+      setUser({ username: 'Operator', email: 'admin@sentinel.core', role: 'VIEWER' });
     }
   };
 

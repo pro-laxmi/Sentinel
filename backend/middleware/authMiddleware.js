@@ -33,3 +33,11 @@ export const checkRole = (requiredRole) => {
     next();
   };
 };
+
+export const verifyCommander = (req, res, next) => {
+  if (req.operator.role === 'ADMIN' || req.operator.role === 'COMMANDER') {
+    next();
+  } else {
+    return res.status(403).json({ error: 'Access Denied: Commander clearance required.' });
+  }
+};

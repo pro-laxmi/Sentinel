@@ -31,7 +31,7 @@ export const registerUser = async (req, res) => {
         email,
         password: hashedPassword,
         bio,
-        role: role || 'DEVELOPER' // Default role if not passed
+        role: role || 'RESPONDER' // Default role if not passed
       }
     });
 

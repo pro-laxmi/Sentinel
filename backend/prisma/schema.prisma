@@ -14,8 +14,9 @@ datasource db {
 
 enum Role {
   ADMIN
-  DEVELOPER
-  VIEWER
+  COMMANDER // Senior Eng
+  RESPONDER // Normal Eng
+  VIEWER // Anyone else
 }
 
 enum LogLevel {
@@ -112,7 +113,7 @@ model User {
   email                String                 @unique
   password             String
   bio                  String?
-  role                 Role                   @default(DEVELOPER)
+  role                 Role                   @default(RESPONDER)
   githubId             String?                @unique
   githubUsername       String?
   githubToken          String?
@@ -237,7 +238,7 @@ model Repo {
   id                   String                 @id @default(uuid())
   name                 String
   url                  String                 @unique
-  serviceId            String
+  serviceId            String?
   createdAt            DateTime               @default(now())
   
   // Relations
@@ -251,10 +252,10 @@ model Commit {
   commitsha            String                 @unique
   message              String
   createdAt            DateTime               @default(now())
-  createdBy            String
+  createdBy            String?    // since there might be other people who are not linked with sentinal and commited to the repo
   
   // Relations
-  user                 User                   @relation(fields: [createdBy], references: [id])
+  user                 User                   @relation(fields: [createdBy], references: [githubId])  // Changed it to GithubId instead of userId
   repo                 Repo                   @relation(fields: [repoId], references: [id])
   deployments          Deployment[]
 }

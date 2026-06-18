@@ -67,34 +67,7 @@ const ServicesPage = () => {
       </header>
 
       <div className="space-y-8">
-        {/* Active Alerts */}
-        <section className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4 text-white flex items-center">
-            <span className="w-2 h-2 rounded-full bg-red-500 mr-3 animate-ping"></span>
-            Active Alerts ({alerts.length})
-          </h2>
-          {alerts.length === 0 ? (
-            <div className="text-slate-500 italic font-mono text-sm">No active carrier errors.</div>
-          ) : (
-            <div className="space-y-3">
-              {alerts.map(alert => (
-                <div key={alert.id} className="bg-red-950/40 border border-red-900/50 p-4 rounded flex justify-between items-center hover:bg-red-900/30 transition-colors">
-                  <div>
-                    <span className="text-xs font-bold text-red-500 bg-red-950 px-2 py-1 rounded mr-3 uppercase">{alert.severity}</span>
-                    <span className="text-red-200 font-mono">{alert.title}</span>
-                  </div>
-                  <button 
-                    onClick={() => handleAcknowledge(alert.id)}
-                    disabled={alert.status === 'ACKNOWLEDGED'}
-                    className={`text-xs px-3 py-1 rounded transition-colors border ${alert.status === 'ACKNOWLEDGED' ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-600'}`}
-                  >
-                    {alert.status === 'ACKNOWLEDGED' ? 'ACKNOWLEDGED' : 'ACKNOWLEDGE'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+
 
         {/* Monitored Services Grid (With Uptime Bar) */}
         <section className="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-lg p-6">
