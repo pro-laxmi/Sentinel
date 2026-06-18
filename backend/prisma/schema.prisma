@@ -32,11 +32,18 @@ enum Severity {
   CRITICAL
 }
 
-enum Status {
+enum AlertStatus {
   OPEN
   ACKNOWLEDGED
   RESOLVED
-  CLOSED
+}
+
+enum IncidentStatus {
+  OPEN
+  INVESTIGATING
+  IDENTIFIED
+  MONITORING
+  RESOLVED
 }
 
 enum AuditAction {
@@ -106,6 +113,10 @@ model User {
   password             String
   bio                  String?
   role                 Role                   @default(DEVELOPER)
+  githubId             String?                @unique
+  githubUsername       String?
+  githubToken          String?
+  createdAt            DateTime               @default(now())
   
   // Relations
   commits              Commit[]
@@ -167,7 +178,7 @@ model Alert {
   logId                String
   title                String
   severity             Severity
-  status               Status                 @default(OPEN)
+  status               AlertStatus            @default(OPEN)
   createdAt            DateTime               @default(now())
   resolvedAt           DateTime?
   
@@ -182,7 +193,7 @@ model Incident {
   teamId               String?                // Optional: For "on-the-fly" incidents
   title                String
   severity             Severity
-  status               Status                 @default(OPEN)
+  status               IncidentStatus         @default(OPEN)
   createdAt            DateTime               @default(now())
   resolvedAt           DateTime?
   slaTarget            DateTime?
@@ -208,6 +219,7 @@ model Service {
   // Relations
   healthChecks         HealthCheck[]
   logs                 Log[]
+  repos                Repo[]
 }
 
 model HealthCheck {
@@ -221,6 +233,18 @@ model HealthCheck {
   service              Service                @relation(fields: [serviceId], references: [id])
 }
 
+model Repo {
+  id                   String                 @id @default(uuid())
+  name                 String
+  url                  String                 @unique
+  serviceId            String
+  createdAt            DateTime               @default(now())
+  
+  // Relations
+  commits              Commit[]
+  service              Service                @relation(fields: [serviceId], references: [id])
+}
+
 model Commit {
   id                   String                 @id @default(uuid())
   repoId               String
@@ -231,6 +255,7 @@ model Commit {
   
   // Relations
   user                 User                   @relation(fields: [createdBy], references: [id])
+  repo                 Repo                   @relation(fields: [repoId], references: [id])
   deployments          Deployment[]
 }
 

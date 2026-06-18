@@ -41,10 +41,10 @@ export default function LoginPage() {
       if (!response.ok) throw new Error(data.error || 'Operation failed');
 
       if (isLogin) {
-        login(data.token); // <--- Triggers Context to update the whole app
+        login(data.token); 
       } else {
-        setIsLogin(true);
-        setFormData({ email: '', username: '', password: '', bio: '' });
+        localStorage.setItem('sentinel_onboarding', 'true');
+        login(data.token);
       }
     } catch (err) {
       setError(err.message);

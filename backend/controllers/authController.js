@@ -35,10 +35,18 @@ export const registerUser = async (req, res) => {
       }
     });
 
+    // Generate the JWT token
+    const token = jwt.sign(
+      { id: newUser.id, username: newUser.username, email: newUser.email, role: newUser.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.status(201).json({ 
       success: true, 
       message: 'User created successfully', 
-      userId: newUser.id 
+      userId: newUser.id,
+      token // Send token to frontend
     });
   } catch (error) {
     console.error(error);

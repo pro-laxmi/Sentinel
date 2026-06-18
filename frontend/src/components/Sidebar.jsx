@@ -17,6 +17,7 @@ const Sidebar = () => {
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
     { name: 'Services & Alerts', path: '/services', icon: <Server size={20} /> },
     { name: 'Telemetry Logs', path: '/logs', icon: <ScrollText size={20} /> },
+    { name: 'Settings', path: '/settings', icon: <ShieldAlert size={20} /> },
   ];
 
   return (

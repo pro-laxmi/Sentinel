@@ -7,6 +7,8 @@ import serviceRoutes from './routes/serviceRoutes.js';
 import logRoutes from './routes/logRoutes.js';
 import alertRoutes from './routes/alertRoutes.js';
 import startHealthCheckWorker from './jobs/healthChecker.js';
+import githubRoutes from './routes/githubRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
 
@@ -23,6 +25,8 @@ app.use('/api/incidents', incidentRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/alerts', alertRoutes);
+app.use('/api/github', githubRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'Sentinel Backend is alive.' });
